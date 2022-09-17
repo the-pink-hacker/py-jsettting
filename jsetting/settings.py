@@ -1,12 +1,17 @@
 import json
 import os
-from typing import Any
+from typing import Any, Optional
 
 
 class Settings:
-    def __init__(self, version: int):
+    def __init__(self, version: int, path: Optional[str]):
         self._properties = {}
         self.add_property("meta", "version", version)
+
+        if path is None:
+            self.path = "settings.json"
+        else:
+            self.path = path
 
     def add_property(self, group: str, key: str, default=None) -> "Settings":
         """
@@ -74,12 +79,12 @@ class Settings:
             raise AttributeError(f"No properties in {group}")
 
     def save(self):
-        with open("settings.json", "w", encoding="utf-8") as file:
+        with open(self.path, "w", encoding="utf-8") as file:
             json.dump(self._properties, file, ensure_ascii=False, indent=2)
 
     def load(self):
-        if os.path.exists("settings.json"):
-            with open("settings.json", "r") as file:
+        if os.path.exists(self.path):
+            with open(self.path, "r") as file:
                 settings_file = json.load(file)
             for group, properties in settings_file.items():
                 for key, value in properties.items():
